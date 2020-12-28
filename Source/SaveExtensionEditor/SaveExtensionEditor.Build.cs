@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 using UnrealBuildTool;
 using System.IO;
@@ -10,27 +10,28 @@ namespace UnrealBuildTool.Rules
 			PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 			bEnforceIWYU = true;
 
-			PublicDependencyModuleNames.AddRange(
-				new string[] {
-					"Core",
-					"Engine",
-					"CoreUObject",
-                    "Kismet",
-					"SaveExtension"
-				}
-			);
+			PublicDependencyModuleNames.AddRange( new string[]
+			{
+				"Core",
+				"Engine",
+				"CoreUObject",
+				"Kismet",
+				"SaveExtension"
+			});
 
-			PrivateDependencyModuleNames.AddRange(
-				new string[] {
-					"AssetTools",
-					"Projects",
-					"InputCore",
-					"UnrealEd",
-					"SlateCore",
-					"Slate",
-					"EditorStyle"
-				}
-			);
+			PrivateDependencyModuleNames.AddRange( new string[]
+			{
+				"AssetTools",
+				"Projects",
+				"InputCore",
+				"UnrealEd",
+				"SlateCore",
+				"Slate",
+				"EditorStyle",
+				"ClassViewer",
+				"BlueprintGraph",
+				"GraphEditor"
+			});
 		}
 	}
 }

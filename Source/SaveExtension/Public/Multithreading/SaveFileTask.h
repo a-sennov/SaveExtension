@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #pragma once
 
@@ -12,20 +12,23 @@
 class FSaveFileTask : public FNonAbandonableTask {
 protected:
 
-	USaveGame* SaveGame;
+	USlotInfo* Info;
+	USlotData* Data;
 	const FString SlotName;
 	const bool bUseCompression;
 
 public:
 
-	FSaveFileTask(USaveGame* InSaveGame, const FString& InSlotName, const bool bInUseCompression) :
-		SaveGame(InSaveGame),
+	FSaveFileTask(USlotInfo* Info, USlotData* Data, const FString& InSlotName, const bool bInUseCompression) :
+		Info(Info),
+		Data(Data),
 		SlotName(InSlotName),
 		bUseCompression(bInUseCompression)
 	{}
 
-	void DoWork() {
-		FFileAdapter::SaveFile(SaveGame, SlotName, bUseCompression);
+	void DoWork()
+	{
+		FFileAdapter::SaveFile(SlotName, Info, Data, bUseCompression);
 	}
 
 	FORCEINLINE TStatId GetStatId() const

@@ -1,12 +1,10 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #pragma once
 
 #include <CoreMinimal.h>
 #include <Engine/LatentActionManager.h>
 #include <LatentActions.h>
-
-#include "Multithreading/LoadAllSlotInfosTask.h"
 
 
 class USaveManager;
@@ -36,7 +34,7 @@ public:
 	FWeakObjectPtr CallbackTarget;
 
 
-	FSaveGameAction(USaveManager* Manager, int32 SlotId, bool bOverrideIfNeeded, bool bScreenshot, const FScreenshotSize Size, ESaveGameResult& OutResult, const FLatentActionInfo& LatentInfo);
+	FSaveGameAction(USaveManager* Manager, FName SlotName, bool bOverrideIfNeeded, bool bScreenshot, const FScreenshotSize Size, ESaveGameResult& OutResult, const FLatentActionInfo& LatentInfo);
 
 	virtual void UpdateOperation(FLatentResponse& Response) override;
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2015-2019 Piperift. All Rights Reserved.
+﻿// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #include "SavePresetDetails.h"
 
@@ -55,7 +55,7 @@ void FSavePresetDetails::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 				]
 			];
 
-			Category.AddProperty(TEXT("MaxFrameMs")).EditCondition({ this, &FSavePresetDetails::CanEditAsynchronous }, NULL);
+			Category.AddProperty(TEXT("MaxFrameMs")).EditCondition({ this, &FSavePresetDetails::CanEditAsynchronous }, nullptr);
 		}
 
 		DetailBuilder.EditCategory(TEXT("Level Streaming"));

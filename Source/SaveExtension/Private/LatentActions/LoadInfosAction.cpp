@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #include "LatentActions/LoadInfosAction.h"
 #include "SaveManager.h"
@@ -13,7 +13,7 @@ FLoadInfosAction::FLoadInfosAction(USaveManager* Manager, const bool bSortByRece
 	, OutputLink(LatentInfo.Linkage)
 	, CallbackTarget(LatentInfo.CallbackTarget)
 {
-	Manager->LoadAllSlotInfos(bSortByRecent, FOnAllInfosLoaded::CreateLambda([this](const TArray<USlotInfo*>& Results) {
+	Manager->LoadAllSlotInfos(bSortByRecent, FOnSlotInfosLoaded::CreateLambda([this](const TArray<USlotInfo*>& Results) {
 		SlotInfos = Results;
 		bFinished = true;
 	}));

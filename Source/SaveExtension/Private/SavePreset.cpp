@@ -1,32 +1,35 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #include "SavePreset.h"
-#include "SlotInfo.h"
+
+#include "LevelFilter.h"
 #include "SlotData.h"
+#include "SlotInfo.h"
 
 
 USavePreset::USavePreset()
 	: Super()
-	, SlotInfoTemplate(USlotInfo::StaticClass())
-	, SlotDataTemplate(USlotData::StaticClass())
-	, MaxSlots(0)
-	, bAutoSave(true)
-	, AutoSaveInterval(120.f)
-	, bSaveOnExit(false)
-	, bAutoLoad(true)
-	, bDebug(false)
-	, bDebugInScreen(true)
-
-	, bStoreGameMode(true)
-	, bStoreGameInstance(false)
-	, bStoreLevelBlueprints(false)
-	, bStoreAIControllers(false)
-	, bStoreComponents(true)
-	, bStoreControlRotation(true)
-	, bUseCompression(true)
-	, MultithreadedSerialization(ESaveASyncMode::SaveAsync)
-	, FrameSplittedSerialization(ESaveASyncMode::OnlySync)
-	, MaxFrameMs(5.f)
-	, MultithreadedFiles(ESaveASyncMode::SaveAndLoadAsync)
-	, bSaveAndLoadSublevels(true)
+	, SlotInfoClass(USlotInfo::StaticClass())
+	, SlotDataClass(USlotData::StaticClass())
 {}
+
+void USavePreset::BPGetSlotNameFromId_Implementation(int32 Id, FName& Name) const
+{
+	// Call C++ inheritance chain by default
+	return GetSlotNameFromId(Id, Name);
+}
+
+void USavePreset::GetSlotNameFromId(int32 Id, FName& Name) const
+{
+	if (IsValidId(Id))
+	{
+		Name = FName{ FString::FromInt(Id) };
+	}
+}
+
+FSELevelFilter USavePreset::ToFilter() const
+{
+	FSELevelFilter Filter{};
+	Filter.FromPreset(*this);
+	return Filter;
+}

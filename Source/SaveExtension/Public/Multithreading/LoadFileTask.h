@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #pragma once
 
@@ -9,36 +9,55 @@
 /////////////////////////////////////////////////////
 // FLoadFileTask
 // Async task to load a File
-class FLoadFileTask : public FNonAbandonableTask {
+class FLoadFileTask : public FNonAbandonableTask
+{
 protected:
 
+	TWeakObjectPtr<USaveManager> Manager;
 	const FString SlotName;
 
-	bool bSucceededLoad;
-	FSaveFileHeader FileHeader;
-	TArray<uint8> DataBytes;
+	TWeakObjectPtr<USlotInfo> SlotInfo;
+	TWeakObjectPtr<USlotData> SlotData;
+
 
 public:
 
-	explicit FLoadFileTask(const FString& InSlotName)
-		: SlotName(InSlotName)
-		, bSucceededLoad{false}
-		, FileHeader{}
-		, DataBytes{}
+	explicit FLoadFileTask(USaveManager* Manager, FStringView SlotName)
+		: Manager(Manager)
+		, SlotName(SlotName)
 	{}
-
-	void DoWork() {
-		// This task splits FFileAdapter::LoadFile for multithreading compatibility
-		bSucceededLoad = FFileAdapter::LoadFileBytes(SlotName, FileHeader, DataBytes);
+	~FLoadFileTask()
+	{
+		if(SlotInfo.IsValid())
+		{
+			SlotInfo->ClearInternalFlags(EInternalObjectFlags::Async);
+		}
+		if(SlotData.IsValid())
+		{
+			SlotData->ClearInternalFlags(EInternalObjectFlags::Async);
+		}
 	}
 
-	// Create and return the resulting loaded SaveGame object. Call when task from Gamethread when task is finished
-	USaveGame* GetSaveGame() {
-		if (bSucceededLoad)
+	void DoWork()
+	{
+		FScopedFileReader FileReader(FFileAdapter::GetSlotPath(SlotName));
+		if(FileReader.IsValid())
 		{
-			return FFileAdapter::CreateFromBytes(FileHeader, DataBytes);
+			FSaveFile File;
+			File.Read(FileReader, false);
+			SlotInfo = File.CreateAndDeserializeInfo(Manager.Get());
+			SlotData = File.CreateAndDeserializeData(Manager.Get());
 		}
-		return nullptr;
+	}
+
+	USlotInfo* GetInfo()
+	{
+		return SlotInfo.Get();
+	}
+
+	USlotData* GetData()
+	{
+		return SlotData.Get();
 	}
 
 	FORCEINLINE TStatId GetStatId() const

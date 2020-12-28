@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #include "Multithreading/DeleteSlotsTask.h"
 
@@ -8,27 +8,38 @@
 #include "SavePreset.h"
 #include "SaveManager.h"
 #include "Misc/SlotHelpers.h"
+#include "HAL/FileManager.h"
 
+
+FDeleteSlotsTask::FDeleteSlotsTask(const USaveManager* InManager, FName SlotName)
+	: Manager(InManager)
+{
+	check(Manager);
+	if(!SlotName.IsNone())
+	{
+		SpecificSlotName = SlotName.ToString();
+	}
+}
 
 void FDeleteSlotsTask::DoWork()
 {
-	if (SpecificSlotId > 0)
+	if (!SpecificSlotName.IsEmpty())
 	{
 		// Delete a single slot by id
-		const FString InfoSlot = Manager->GenerateSlotInfoName(SpecificSlotId);
-		const FString DataSlot = Manager->GenerateSlotDataName(SpecificSlotId);
-		bSuccess = FFileAdapter::DeleteFile(InfoSlot) ||
-			       FFileAdapter::DeleteFile(DataSlot);
+		const FString ScreenshotPath = FFileAdapter::GetThumbnailPath(SpecificSlotName);
+		bool bIsDeleteSlotSuccess = FFileAdapter::DeleteFile(SpecificSlotName);
+		bool bIsDeleteScreenshotSuccess = IFileManager::Get().Delete(*ScreenshotPath, true);
+		bSuccess = bIsDeleteSlotSuccess || bIsDeleteScreenshotSuccess;
 	}
 	else
 	{
-		TArray<FString> FileNames;
-		FSlotHelpers::GetSlotFileNames(FileNames);
+		TArray<FString> FoundSlots;
+		FSlotHelpers::FindSlotFileNames(FoundSlots);
 
-		for (const FString& File : FileNames)
+		for (const FString& File : FoundSlots)
 		{
 			FFileAdapter::DeleteFile(File);
 		}
-		bSuccess = FileNames.Num() > 0;
+		bSuccess = true;
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #include "SlotInfo.h"
 
@@ -14,10 +14,14 @@
 UTexture2D* USlotInfo::GetThumbnail() const
 {
 	if (ThumbnailPath.IsEmpty())
+	{
 		return nullptr;
+	}
 
 	if (CachedThumbnail)
+	{
 		return CachedThumbnail;
+	}
 
 	// Load thumbnail as Texture2D
 	UTexture2D* Texture{ nullptr };
@@ -28,12 +32,12 @@ UTexture2D* USlotInfo::GetThumbnail() const
 		TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
 		if (ImageWrapper.IsValid() && ImageWrapper->SetCompressed(RawFileData.GetData(), RawFileData.Num()))
 		{
-			const TArray<uint8>* UncompressedBGRA = nullptr;
+			TArray64<uint8> UncompressedBGRA;
 			if (ImageWrapper->GetRaw(ERGBFormat::BGRA, 8, UncompressedBGRA))
 			{
 				Texture = UTexture2D::CreateTransient(ImageWrapper->GetWidth(), ImageWrapper->GetHeight(), PF_B8G8R8A8);
 				void* TextureData = Texture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-				FMemory::Memcpy(TextureData, UncompressedBGRA->GetData(), UncompressedBGRA->Num());
+				FMemory::Memcpy(TextureData, UncompressedBGRA.GetData(), UncompressedBGRA.Num());
 				Texture->PlatformData->Mips[0].BulkData.Unlock();
 				Texture->UpdateResource();
 			}
@@ -45,37 +49,31 @@ UTexture2D* USlotInfo::GetThumbnail() const
 
 bool USlotInfo::CaptureThumbnail(const int32 Width /*= 640*/, const int32 Height /*= 360*/)
 {
-	if (!GEngine)
-		return false;
-
-	UGameViewportClient* GameViewport = GEngine->GameViewport;
-	if (GameViewport)
+	if (!GEngine || !GEngine->GameViewport || FileName.IsNone())
 	{
+		return false;
+	}
+
+	if (auto* Viewport = GEngine->GameViewport->Viewport)
+	{
+		_SetThumbnailPath(FFileAdapter::GetThumbnailPath(FileName.ToString()));
+
+		// TODO: Removal of a thumbnail should be standarized in a function
+		IFileManager& FM = IFileManager::Get();
+		if (ThumbnailPath.Len() > 0 && FM.FileExists(*ThumbnailPath))
+		{
+			FM.Delete(*ThumbnailPath, false, true, true);
+		}
+
 		FHighResScreenshotConfig& HighResScreenshotConfig = GetHighResScreenshotConfig();
 		HighResScreenshotConfig.SetHDRCapture(false);
-
-		FViewport * Viewport = GameViewport->Viewport;
-		if (Viewport)
-		{
-			FString Previous = ThumbnailPath;
-
-			IFileManager* FM = &IFileManager::Get();
-
-			if (Previous.Len() > 0 && FM->FileExists(*Previous))
-			{
-				FM->Delete(*Previous, false, true, true);
-			}
-
-			_SetThumbnailPath(FString::Printf(TEXT("%sSaveGames/%i_%s.%s"), *FPaths::ProjectSavedDir(), Id, *FString("SaveScreenshot"), TEXT("png")));
-
-			//Set Screenshot path
-			HighResScreenshotConfig.FilenameOverride = ThumbnailPath;
-			//Set Screenshot Resolution
-			GScreenshotResolutionX = Width;
-			GScreenshotResolutionY = Height;
-			Viewport->TakeHighResScreenShot();
-			return true;
-		}
+		//Set Screenshot path
+		HighResScreenshotConfig.FilenameOverride = ThumbnailPath;
+		//Set Screenshot Resolution
+		GScreenshotResolutionX = Width;
+		GScreenshotResolutionY = Height;
+		Viewport->TakeHighResScreenShot();
+		return true;
 	}
 	return false;
 }

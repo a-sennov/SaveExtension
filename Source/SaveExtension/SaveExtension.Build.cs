@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 using UnrealBuildTool;
 using System.IO;
@@ -12,17 +12,17 @@ public class SaveExtension : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		bEnforceIWYU = true;
 
-		PublicDependencyModuleNames.AddRange(
-			new string[] {
-				"Core",
-				"Engine",
-				"Foliage",
-				"AIModule",
-				"CoreUObject",
-				"ImageWrapper",
-				"NavigationSystem"
-			}
-		);
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core",
+			"Engine",
+			"Foliage",
+			"AIModule",
+			"CoreUObject",
+			"DeveloperSettings",
+			"ImageWrapper",
+			"NavigationSystem"
+		});
 	}
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #include "SlotData.h"
 #include <TimerManager.h>
@@ -16,117 +16,6 @@
  */
 #define GET_PRIVATE(InClass, InObj, MemberName) (*InObj).*GetPrivate(InClass##MemberName##Accessor())
 
-
-FName FPersistentLevelRecord::PersistentName{ "Persistent" };
-
-
-/////////////////////////////////////////////////////
-// Records
-
-bool FBaseRecord::Serialize(FArchive& Ar)
-{
-	Ar << Name;
-	return true;
-}
-
-FObjectRecord::FObjectRecord(const UObject* Object) : Super()
-{
-	if (Object)
-	{
-		Name = Object->GetFName();
-		Class = Object->GetClass();
-	}
-}
-
-bool FObjectRecord::Serialize(FArchive& Ar)
-{
-	Super::Serialize(Ar);
-
-	if (!Name.IsNone())
-		Ar << Class;
-	else if (Ar.IsLoading())
-		Class = nullptr;
-
-	Ar << Data;
-	Ar << Tags;
-	return true;
-}
-
-bool FComponentRecord::Serialize(FArchive& Ar)
-{
-	Super::Serialize(Ar);
-	Ar << Transform;
-	return true;
-}
-
-bool FActorRecord::Serialize(FArchive& Ar)
-{
-	Super::Serialize(Ar);
-
-	Ar.SerializeBits(&bHiddenInGame, 1);
-	Ar.SerializeBits(&bIsProcedural, 1);
-
-	Ar << Transform;
-	Ar << LinearVelocity;
-	Ar << AngularVelocity;
-	Ar << ComponentRecords;
-	return true;
-}
-
-bool FControllerRecord::Serialize(FArchive& Ar)
-{
-	Super::Serialize(Ar);
-
-	Ar << ControlRotation;
-
-	return true;
-}
-
-
-bool FLevelRecord::Serialize(FArchive& Ar)
-{
-	Super::Serialize(Ar);
-
-	Ar << LevelScript;
-	Ar << Actors;
-	Ar << AIControllers;
-
-	return true;
-}
-
-void FLevelRecord::Clean()
-{
-	LevelScript = {};
-	Actors.Empty();
-	AIControllers.Empty();
-}
-
-
-/////////////////////////////////////////////////////
-// FSaveExtensionArchive
-
-FArchive& FSaveExtensionArchive::operator<<(FSoftObjectPtr& Value)
-{
-	*this << Value.GetUniqueID();
-
-	return *this;
-}
-
-FArchive& FSaveExtensionArchive::operator<<(FSoftObjectPath& Value)
-{
-	FString Path = Value.ToString();
-
-	*this << Path;
-
-	if (IsLoading())
-	{
-		Value.SetPath(MoveTemp(Path));
-	}
-
-	return *this;
-}
-
-
 /////////////////////////////////////////////////////
 // USlotData
 
@@ -134,35 +23,22 @@ void USlotData::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 
+	Ar << bStoreGameInstance;
 	Ar << GameInstance;
-	Ar << GameMode;
-	Ar << GameState;
 
-	Ar << PlayerPawn;
-	Ar << PlayerController;
-	Ar << PlayerState;
-	Ar << PlayerHUD;
-
+	static UScriptStruct* const LevelFilterType{ FSELevelFilter::StaticStruct() };
+	LevelFilterType->SerializeItem(Ar, &GeneralLevelFilter, nullptr);
 	MainLevel.Serialize(Ar);
 	Ar << SubLevels;
 }
 
-void USlotData::Clean(bool bKeepLevels)
+void USlotData::CleanRecords(bool bKeepSublevels)
 {
 	//Clean Up serialization data
-	GameMode = {};
-	GameState = {};
-
-	PlayerPawn = {};
-	PlayerController = {};
-	PlayerState = {};
-	PlayerHUD = {};
-
 	GameInstance = {};
 
-	MainLevel.Clean();
-
-	if (!bKeepLevels)
+	MainLevel.CleanRecords();
+	if (!bKeepSublevels)
 	{
 		SubLevels.Empty();
 	}

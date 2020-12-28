@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #pragma once
 
@@ -29,13 +29,6 @@ class SAVEEXTENSION_API ULifetimeComponent : public UActorComponent, public ISav
 {
 	GENERATED_BODY()
 
-
-	/************************************************************************/
-	/* PROPERTIES														    */
-	/************************************************************************/
-public:
-
-
 	/************************************************************************/
 	/* METHODS											     			    */
 	/************************************************************************/
@@ -48,15 +41,15 @@ public:
 
 
 	// Event called when Save process starts
-	virtual void OnSaveBegan() override;
+	virtual void OnSaveBegan(const FSELevelFilter& Filter) override;
 
 	// Event called when Load process ends
-	virtual void OnLoadFinished(bool bError);
+	virtual void OnLoadFinished(const FSELevelFilter& Filter, bool bError);
 
 
-	FORCEINLINE USaveManager* GetManager() const
+	USaveManager* GetManager() const
 	{
-		return USaveManager::GetSaveManager(GetWorld());
+		return USaveManager::Get(GetWorld());
 	}
 
 

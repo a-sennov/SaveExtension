@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #pragma once
 
@@ -11,7 +11,8 @@
 
 
 UCLASS()
-class SAVEEXTENSIONEDITOR_API USavePresetFactory : public UFactory {
+class SAVEEXTENSIONEDITOR_API USavePresetFactory : public UFactory
+{
 	GENERATED_BODY()
 
 public:

@@ -1,54 +1,56 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #pragma once
 
 #include <UObject/Interface.h>
+
+#include "LevelFilter.h"
 #include "SaveExtensionInterface.generated.h"
 
+
 UINTERFACE(Category = SaveExtension, BlueprintType)
-class SAVEEXTENSION_API USaveExtensionInterface : public UInterface {
+class SAVEEXTENSION_API USaveExtensionInterface : public UInterface
+{
 	GENERATED_UINTERFACE_BODY()
 };
 
-class SAVEEXTENSION_API ISaveExtensionInterface {
+class SAVEEXTENSION_API ISaveExtensionInterface
+{
 
 	GENERATED_BODY()
 
 public:
 
-
-
-
 	/** BP API **/
 
 	// Event called when Save process starts
 	UFUNCTION(Category = Save, BlueprintImplementableEvent, meta = (DisplayName = "On Save Began"))
-	void ReceiveOnSaveBegan();
+	void ReceiveOnSaveBegan(const FSELevelFilter& Filter);
 
 	// Event called when Save process ends
 	UFUNCTION(Category = Save, BlueprintImplementableEvent, meta = (DisplayName = "On Save Finished"))
-	void ReceiveOnSaveFinished(bool bError);
+	void ReceiveOnSaveFinished(const FSELevelFilter& Filter, bool bError);
 
 	// Event called when Load process starts
 	UFUNCTION(Category = Save, BlueprintImplementableEvent, meta = (DisplayName = "On Load Began"))
-	void ReceiveOnLoadBegan();
+	void ReceiveOnLoadBegan(const FSELevelFilter& Filter);
 
 	// Event called when Load process ends
 	UFUNCTION(Category = Save, BlueprintImplementableEvent, meta = (DisplayName = "On Load Finished"))
-	void ReceiveOnLoadFinished(bool bError);
+	void ReceiveOnLoadFinished(const FSELevelFilter& Filter, bool bError);
 
 
 	/** C++ API **/
 
 	// Event called when Save process starts
-	virtual void OnSaveBegan() {}
+	virtual void OnSaveBegan(const FSELevelFilter& Filter) {}
 
 	// Event called when Save process ends
-	virtual void OnSaveFinished(bool bError) {}
+	virtual void OnSaveFinished(const FSELevelFilter& Filter, bool bError) {}
 
 	// Event called when Load process starts
-	virtual void OnLoadBegan() {}
+	virtual void OnLoadBegan(const FSELevelFilter& Filter) {}
 
 	// Event called when Load process ends
-	virtual void OnLoadFinished(bool bError) {}
+	virtual void OnLoadFinished(const FSELevelFilter& Filter, bool bError) {}
 };

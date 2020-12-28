@@ -1,4 +1,4 @@
-// Copyright 2015-2019 Piperift. All Rights Reserved.
+// Copyright 2015-2020 Piperift. All Rights Reserved.
 
 #include "SlotDataFactory.h"
 #include "Kismet2/KismetEditorUtilities.h"
@@ -15,7 +15,7 @@ UObject* USlotDataFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FN
 
 	if (!FKismetEditorUtilities::CanCreateBlueprintOfClass(Class))
 	{
-		return NULL;
+		return nullptr;
 	}
-	return FKismetEditorUtilities::CreateBlueprint(Class,InParent,Name,BPTYPE_Const,UBlueprint::StaticClass(),UBlueprintGeneratedClass::StaticClass(),TEXT("AssetTypeActions"));
+	return FKismetEditorUtilities::CreateBlueprint(Class, InParent, Name, BPTYPE_Normal, UBlueprint::StaticClass(), UBlueprintGeneratedClass::StaticClass(), TEXT("AssetTypeActions"));
 }
